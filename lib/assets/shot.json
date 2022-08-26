@@ -1,0 +1,17 @@
+{
+    "timestamp": "20220721.082357",
+    "user": "MLJ",
+    "sensorID": "fz-21",
+    "gain": 2,
+    "sr": 3600,
+    "line": 1,
+    "sta": 1,
+    "lat": 37.897324,
+    "lon": -109.123543,
+    "gpsAcc": 15,
+    "freq": 3600,
+    "notes": "Starting Line2",
+    "shotData": [1,2,3,4]
+
+
+}
