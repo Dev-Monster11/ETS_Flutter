@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Shot {
   DateTime? timestamp;
   String? user;
