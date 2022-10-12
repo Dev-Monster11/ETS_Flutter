@@ -59,7 +59,7 @@ class DaqDeviceController extends GetxController {
       //     scanResult.peripheral.identifier);
     }
     discoveredScanResults.add(scanResult.peripheral);
-
+    print(scanResult.peripheral.identifier);
     // notifyListeners();
   }
 
@@ -175,6 +175,20 @@ class DaqDeviceController extends GetxController {
       print(exception.toString());
     }
     scanStatus.value = BluetoothScanStatus.SCANNING;
+    discoveredScanResults.clear();
+    var endTime = DateTime.now().add(Duration(seconds: 30));
+    performScan();
+    scanTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      if (DateTime.now().isAfter(endTime)) {
+        // print("start scan");
+        stopScan();
+      } else {
+        performScan();
+      }
+    });
+  }
+
+  void performScan() async {
     BleManager().startPeripheralScan(uuids: ["0001"]).listen((scanResult) {
       print(scanResult);
       _peripheralDiscovered(scanResult);
