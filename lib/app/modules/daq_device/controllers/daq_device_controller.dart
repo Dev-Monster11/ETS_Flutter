@@ -189,7 +189,7 @@ class DaqDeviceController extends GetxController {
   }
 
   void performScan() async {
-    BleManager().startPeripheralScan(uuids: ["0001"]).listen((scanResult) {
+    BleManager().startPeripheralScan(uuids: ["fe84"]).listen((scanResult) {
       print(scanResult);
       _peripheralDiscovered(scanResult);
     });
