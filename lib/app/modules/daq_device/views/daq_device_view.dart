@@ -38,9 +38,12 @@ class DaqDeviceView extends GetView<DaqDeviceController> {
                           itemCount: controller.discoveredScanResults.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                              title: controller.discoveredScanResults[index]
-                                  .advertisementData.localName,
-                            );
+                                title: controller.discoveredScanResults[index]
+                                    .advertisementData.localName,
+                                onTap: () {
+                                  controller.connectToPeripheral(controller
+                                      .discoveredScanResults[index].peripheral);
+                                });
                           },
                         )))));
   }
