@@ -280,7 +280,7 @@ class HomeController extends GetxController {
   // }
 
   void startBluetooth() async {
-    Get.to('/daq-device');
+    Get.toNamed('/daq-device');
   }
 
   List<List<dynamic>> metadata() {
