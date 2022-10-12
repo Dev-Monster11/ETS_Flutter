@@ -176,6 +176,7 @@ class DaqDeviceController extends GetxController {
     }
     scanStatus.value = BluetoothScanStatus.SCANNING;
     BleManager().startPeripheralScan(uuids: ["0001"]).listen((scanResult) {
+      print(scanResult);
       _peripheralDiscovered(scanResult);
     });
   }
