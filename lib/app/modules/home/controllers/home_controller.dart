@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:location/location.dart';
-import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
+
 import 'package:csv/csv.dart';
 import 'package:archive/archive_io.dart';
 import '../shot_model.dart';
@@ -43,9 +44,10 @@ class HomeController extends GetxController {
   final fileList = [].obs;
   final distanceCalc = false.obs;
   final spotData = <FlSpot>[].obs;
-  final bluetoothState = false.obs;
+
   Timer? timer;
 
+  @override
   void onInit() {
     super.onInit();
     // tempContent[0] = projectName.value;
@@ -277,7 +279,10 @@ class HomeController extends GetxController {
   //   }
   // }
 
-  void startBluetooth() {}
+  void startBluetooth() async {
+    Get.to('/daq-device');
+  }
+
   List<List<dynamic>> metadata() {
     return [];
   }
@@ -362,6 +367,7 @@ class HomeController extends GetxController {
   void onAction(value) async {
     if (value == 1) {
       print("Bluetooth");
+      startBluetooth();
     } else if (value == 2) {
       print("Email");
       // Directory project = await getTemporaryDirectory();
