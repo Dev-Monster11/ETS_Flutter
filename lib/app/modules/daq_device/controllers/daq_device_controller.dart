@@ -167,8 +167,10 @@ class DaqDeviceController extends GetxController {
 
   void startScan() async {
     scanTimer?.cancel();
+    print("Start Scan");
     try {
       if (await _connectedPeripheral?.isConnected() ?? false) {
+        print("Start Scan");
         await _connectedPeripheral?.disconnectOrCancelConnection();
       }
     } catch (exception, stackTrace) {
@@ -189,6 +191,8 @@ class DaqDeviceController extends GetxController {
   }
 
   void performScan() async {
+    print("Perform Scan");
+
     BleManager().startPeripheralScan(uuids: ["fe84"]).listen((scanResult) {
       print(scanResult);
       _peripheralDiscovered(scanResult);
