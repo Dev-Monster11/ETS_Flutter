@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:location/location.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
-
+// import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:csv/csv.dart';
 import 'package:archive/archive_io.dart';
 import '../shot_model.dart';
@@ -60,7 +60,9 @@ class HomeController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
-
+    Future.delayed(Duration(seconds: 3)).then((value) {
+      FlutterNativeSplash.remove();
+    });
     bool _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
