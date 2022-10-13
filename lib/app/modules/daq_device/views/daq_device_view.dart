@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
 import 'package:get/get.dart';
 
 import '../controllers/daq_device_controller.dart';
@@ -38,11 +38,12 @@ class DaqDeviceView extends GetView<DaqDeviceController> {
                           itemCount: controller.discoveredScanResults.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                                title: controller.discoveredScanResults[index]
-                                    .advertisementData.localName,
+                                title: Text(controller
+                                        .discoveredScanResults[index].name ??
+                                    'Unnamed'),
                                 onTap: () {
-                                  controller.connectToPeripheral(controller
-                                      .discoveredScanResults[index].peripheral);
+                                  controller.connectToPeripheral(
+                                      controller.discoveredScanResults[index]);
                                 });
                           },
                         )))));

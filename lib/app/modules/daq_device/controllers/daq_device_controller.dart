@@ -1,10 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
-const String SERVICE_UUID = "00000001-710e-4a5b-8d75-3e5b444bc3cf";
-const String CHARACTERISTIC_UUID = "00000002-710e-4a5b-8d75-3e5b444bc3cf";
+const String SERVICE_UUID = "0000fe84-0000-1000-8000-00805f9b34fb";
+const String CHARACTERISTIC_UUID = "2d30c082-f39f-4ce6-923f-3484ea480596";
+
 enum BluetoothScanStatus { UNAVAILABLE, IDLE, SCANNING }
 enum BluetoothDeviceStatus {
   UNAVAILABLE,
@@ -19,9 +21,10 @@ class DaqDeviceController extends GetxController {
   final bluetoothState = BluetoothState.UNKNOWN.obs;
   final scanStatus = BluetoothScanStatus.UNAVAILABLE.obs;
   final deviceStatus = BluetoothDeviceStatus.UNAVAILABLE.obs;
-  final discoveredScanResults = [].obs;
+  final discoveredScanResults = <Peripheral>[].obs;
   Timer? scanTimer;
   Peripheral? _connectedPeripheral;
+  Characteristic? handle;
   StreamSubscription? monitorSubscription;
 
   @override
@@ -39,6 +42,20 @@ class DaqDeviceController extends GetxController {
     });
   }
 
+  Future<Characteristic?> getCharacteristic() async {
+    bool connected = await _connectedPeripheral?.isConnected() ?? false;
+    if (connected == false) return null;
+
+    await _connectedPeripheral!.discoverAllServicesAndCharacteristics();
+    List<Service> ss = await _connectedPeripheral!.services();
+    List<Characteristic> cs = await ss
+        .firstWhere((element) => element.uuid == SERVICE_UUID)
+        .characteristics();
+    Characteristic c =
+        cs.firstWhere((element) => element.uuid == CHARACTERISTIC_UUID);
+    return c;
+  }
+
   @override
   void onClose() {}
   stopScan() {
@@ -51,16 +68,21 @@ class DaqDeviceController extends GetxController {
     // Check for duplicates and remove from list, replacing with more recently found result
 
     if (discoveredScanResults
-        .map((dsr) => dsr.scanResult.peripheral.identifier)
+        .map((dsr) => dsr.identifier)
         .contains(scanResult.peripheral.identifier)) {
       return;
       // _discoveredScanResults.removeWhere((dsr) =>
       //     dsr.scanResult.peripheral.identifier ==
       //     scanResult.peripheral.identifier);
     }
+
     discoveredScanResults.add(scanResult.peripheral);
-    print(scanResult.peripheral.identifier);
+    // print(scanResult.peripheral.identifier);
     // notifyListeners();
+  }
+
+  void startComm() {
+    handle!.write(Uint8List.fromList('Start'.codeUnits), false);
   }
 
   _setConnectedPeripheral(Peripheral? peripheral) async {
@@ -68,10 +90,9 @@ class DaqDeviceController extends GetxController {
       if (await _connectedPeripheral?.isConnected() ?? false) {
         await _connectedPeripheral?.disconnectOrCancelConnection();
       }
-    } catch (exception, stackTrace) {
+    } catch (exception) {
       print(exception.toString());
     }
-
     _connectedPeripheral = peripheral;
     if (peripheral != null) {
       //   // DeviceService().clearDevice();
@@ -79,13 +100,16 @@ class DaqDeviceController extends GetxController {
       await monitorSubscription?.cancel();
       stopScan();
       try {
-        // _surveyService.resetCounts();
         await peripheral.discoverAllServicesAndCharacteristics();
+        List<Service> ss = await peripheral.services();
+        List<Characteristic> cs = await ss
+            .firstWhere((element) => element.uuid == SERVICE_UUID)
+            .characteristics();
+        handle =
+            cs.firstWhere((element) => element.uuid == CHARACTERISTIC_UUID);
 
-        _readStream(peripheral
-            .monitorCharacteristic(SERVICE_UUID, CHARACTERISTIC_UUID)
-            .map((event) => event.value));
-      } catch (exception, stackTrace) {
+        Get.back();
+      } catch (exception) {
         print(exception.toString());
       }
       // DeviceService().loadDeviceWithUUID(peripheral.identifier);
@@ -94,35 +118,10 @@ class DaqDeviceController extends GetxController {
 
   _readStream(Stream<Uint8List> list) async {
     try {
-      // await for (var characteristic in stream) {
-      //   var list = characteristic.value;
-      // list is 20 bytes long
-      // 0-7: The counts.pro's uptime in microseconds
-      // 8-11: A duplicate of the least-significant four bytes of the uptime (unused)
-      // 12-15: counts from channel B
-      // 16-19: counts from channel A
-
-      // for (int a in list) {
-      //   print(a.toRadixString(16));
-      // }
-
       monitorSubscription = list.listen((event) {
         print(event);
-        // print(event);
-        // _surveyService.logDataEntry(
-        //     countA: event['countA'],
-        //     countB: event['countB'],
-        //     deviceTime: event['microseconds']);
       });
-      // int microseconds = list.buffer.asUint64List(0, 1).first;
-      // var list32 = list.buffer.asUint32List(12, 2);
-      // var countA = list32.last;
-      // var countB = list32.first;
-      // print('Count A is $countA');
-      // print('Count B is $countB');
-      // print('MicroSecons is $microseconds');
-      // }
-    } catch (exception, stackTrace) {
+    } catch (exception) {
       print(exception.toString());
     }
   }
@@ -149,13 +148,6 @@ class DaqDeviceController extends GetxController {
           deviceStatus.value = BluetoothDeviceStatus.DISCONNECTING;
           _setConnectedPeripheral(null);
         } else if (connectionState == PeripheralConnectionState.disconnected) {
-          // if (deviceStatus.value != BluetoothDeviceStatus.DISCONNECTED) {
-          //   // Device is unexpectedly disconnecting
-          //   deviceHungUp = true;
-          //   _showHangupNotification();
-          // }
-          // // End any active survey if there is one
-          // SurveyService().endSurvey();
           deviceStatus.value = BluetoothDeviceStatus.DISCONNECTED;
           _setConnectedPeripheral(null);
         }
@@ -167,34 +159,32 @@ class DaqDeviceController extends GetxController {
 
   void startScan() async {
     scanTimer?.cancel();
-    print("Start Scan");
     try {
       if (await _connectedPeripheral?.isConnected() ?? false) {
-        print("Start Scan");
         await _connectedPeripheral?.disconnectOrCancelConnection();
       }
-    } catch (exception, stackTrace) {
+    } catch (exception) {
       print(exception.toString());
     }
     scanStatus.value = BluetoothScanStatus.SCANNING;
     discoveredScanResults.clear();
-    var endTime = DateTime.now().add(Duration(seconds: 30));
+    var endTime = DateTime.now().add(Duration(seconds: 50));
     performScan();
-    scanTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    scanTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       if (DateTime.now().isAfter(endTime)) {
         // print("start scan");
         stopScan();
-      } else {
-        performScan();
       }
+      //  else {
+      //   performScan();
+      // }
     });
   }
 
   void performScan() async {
-    print("Perform Scan");
+    // print("Perform Scan");
 
-    BleManager().startPeripheralScan(uuids: ["fe84"]).listen((scanResult) {
-      print(scanResult);
+    BleManager().startPeripheralScan().listen((scanResult) {
       _peripheralDiscovered(scanResult);
     });
   }

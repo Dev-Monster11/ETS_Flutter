@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:ets/app/modules/daq_device/controllers/daq_device_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +48,7 @@ class HomeController extends GetxController {
   final spotData = <FlSpot>[].obs;
 
   Timer? timer;
-
+  StreamSubscription? monitorSubscription;
   @override
   void onInit() {
     super.onInit();
@@ -58,6 +60,7 @@ class HomeController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
+
     bool _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -175,9 +178,17 @@ class HomeController extends GetxController {
       });
     }
   }
-  // void calcDistMoved(){
 
-  // }
+  _readStream(Stream<Uint8List> list) async {
+    try {
+      monitorSubscription = list.listen((event) {
+        print(event);
+      });
+    } catch (exception) {
+      print(exception.toString());
+    }
+  }
+
   void start() {
     tempShot.update((val) {
       val?.shot = val.shot! + 1;
@@ -198,8 +209,12 @@ class HomeController extends GetxController {
       distMoved.value = 2 * r * asin(sqrt(a));
       // distMoved.value = d;
     });
+    DaqDeviceController daq = Get.put(DaqDeviceController());
     if (isStarted.value == true) {
       // tempShot.value.shotData?.clear();
+      print("Handle ${daq.handle?.uuid}");
+      daq.handle!.write(Uint8List.fromList('Start'.codeUnits), false);
+      _readStream(daq.handle!.monitor());
       tempShot.update((val) {
         val?.shotData?.clear();
       });
@@ -225,6 +240,8 @@ class HomeController extends GetxController {
         }
       });
     } else {
+      daq.handle!.write(Uint8List.fromList('Stop'.codeUnits), false);
+      monitorSubscription?.cancel();
       count.value = 0;
       timer?.cancel();
     }
