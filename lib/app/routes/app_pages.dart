@@ -6,6 +6,8 @@ import 'package:ets/app/modules/home/bindings/home_binding.dart';
 import 'package:ets/app/modules/home/views/home_view.dart';
 import 'package:ets/app/modules/project/bindings/project_binding.dart';
 import 'package:ets/app/modules/project/views/project_view.dart';
+import 'package:ets/app/modules/setting/bindings/setting_binding.dart';
+import 'package:ets/app/modules/setting/views/setting_view.dart';
 
 part 'app_routes.dart';
 
@@ -26,9 +28,10 @@ class AppPages {
       binding: ProjectBinding(),
     ),
     GetPage(
-      name: _Paths.DAQ_DEVICE,
-      page: () => DaqDeviceView(),
-      binding: DaqDeviceBinding(),
+      name: _Paths.SETTING,
+      page: () => SettingView(),
+      binding: SettingBinding(),
+      transition: Transition.leftToRight,
     ),
   ];
 }

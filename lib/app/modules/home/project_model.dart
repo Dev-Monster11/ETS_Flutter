@@ -1,23 +1,25 @@
 import './shot_model.dart';
 
 class Project {
-  int? freq;
   List<Shot>? shots;
-  int? totalShots;
-
-  Project({this.freq, this.shots, this.totalShots});
+  String? name;
+  String? user;
+  String? sensor;
+  Project({this.name, this.shots, this.user, this.sensor});
 
   Project.fromJson(Map<String, dynamic> json) {
-    freq = json['freq'];
+    name = json['name'];
+    user = json['user'];
     shots = json['shots'];
-    totalShots = json['totalShots'];
+    sensor = json['sensor'];
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
-    data['freq'] = freq;
+    data['name'] = name;
     data['shots'] = shots;
-    data['totalShots'] = totalShots;
+    data['user'] = user;
+    data['sensor'] = sensor;
     return data;
   }
 }

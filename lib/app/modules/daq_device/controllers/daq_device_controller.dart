@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
 import 'dart:async';
@@ -26,10 +25,11 @@ class DaqDeviceController extends GetxController {
   Peripheral? _connectedPeripheral;
   Characteristic? handle;
   StreamSubscription? monitorSubscription;
-
+  // VoidCallback? readStream;
   @override
   void onInit() {
     super.onInit();
+    // readStream = Get.arguments['callback'];
   }
 
   @override
@@ -75,7 +75,7 @@ class DaqDeviceController extends GetxController {
       //     dsr.scanResult.peripheral.identifier ==
       //     scanResult.peripheral.identifier);
     }
-
+    print(scanResult.peripheral.name);
     discoveredScanResults.add(scanResult.peripheral);
     // print(scanResult.peripheral.identifier);
     // notifyListeners();
@@ -107,8 +107,11 @@ class DaqDeviceController extends GetxController {
             .characteristics();
         handle =
             cs.firstWhere((element) => element.uuid == CHARACTERISTIC_UUID);
-
-        Get.back();
+        print("Found UUID---${handle!.uuid}");
+        // handle!.write(Uint8List.fromList('Start'.codeUnits), false);
+        // _readStream(handle!.monitor());
+        Get.back(result: handle);
+        // Get.back();
       } catch (exception) {
         print(exception.toString());
       }
@@ -117,6 +120,7 @@ class DaqDeviceController extends GetxController {
   }
 
   _readStream(Stream<Uint8List> list) async {
+    print("ReadStream");
     try {
       monitorSubscription = list.listen((event) {
         print(event);

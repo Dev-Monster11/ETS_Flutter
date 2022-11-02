@@ -7,12 +7,12 @@ abstract class Routes {
   static const HOME = _Paths.HOME;
   static const SPLASH = _Paths.SPLASH;
   static const PROJECT = _Paths.PROJECT;
-  static const DAQ_DEVICE = _Paths.DAQ_DEVICE;
+  static const SETTING = _Paths.SETTING;
 }
 
 abstract class _Paths {
   static const HOME = '/home';
   static const SPLASH = '/splash';
   static const PROJECT = '/project';
-  static const DAQ_DEVICE = '/daq-device';
+  static const SETTING = '/setting';
 }

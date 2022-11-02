@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ets/app/modules/daq_device/controllers/daq_device_controller.dart';
+import 'package:ets/app/services/bluetooth_service.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -10,15 +12,25 @@ import 'package:path_provider/path_provider.dart';
 import 'package:location/location.dart';
 import 'package:share_plus/share_plus.dart';
 // import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:csv/csv.dart';
 import 'package:archive/archive_io.dart';
 import '../shot_model.dart';
 import 'dart:io';
 import 'dart:math';
+import '../../widgets/custom_textfield.dart';
+import '../project_model.dart';
+import '../shot_model.dart';
+
+const String SERVICE_UUID = "0000fe84-0000-1000-8000-00805f9b34fb";
+const String CHARACTERISTIC_UUID = "2d30c082-f39f-4ce6-923f-3484ea480596";
+const MAX_COUNT = 16384;
 
 class HomeController extends GetxController {
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  final project = Project(name: '', shots: []).obs;
+
   final shots = <Shot>[].obs;
   final freq = 900.obs;
   final totalShots = 0.obs;
@@ -46,9 +58,14 @@ class HomeController extends GetxController {
   final fileList = [].obs;
   final distanceCalc = false.obs;
   final spotData = <FlSpot>[].obs;
+  final devices = [].obs;
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
+  // Timer? timer;
 
-  Timer? timer;
-  StreamSubscription? monitorSubscription;
+  // StreamSubscription? monitorSubscription;
+  BluetoothCharacteristic? handle;
+  // Bluetooth_Service? service;
+
   @override
   void onInit() {
     super.onInit();
@@ -79,6 +96,7 @@ class HomeController extends GetxController {
       }
     }
     basePoint = await location.getLocation();
+
     // if (defaultTargetPlatform == TargetPlatform.android) {
     //   locationSettings = AndroidSettings(
     //       accuracy: LocationAccuracy.high,
@@ -121,14 +139,6 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {}
-
-  void openDrawer() {
-    scaffoldKey.currentState?.openDrawer();
-  }
-
-  void closeDrawer() {
-    scaffoldKey.currentState?.openEndDrawer();
-  }
 
   List<FlSpot> chartSpot() {
     var result = <FlSpot>[];
@@ -181,15 +191,22 @@ class HomeController extends GetxController {
     }
   }
 
-  _readStream(Stream<Uint8List> list) async {
-    try {
-      monitorSubscription = list.listen((event) {
-        print(event);
-      });
-    } catch (exception) {
-      print(exception.toString());
-    }
-  }
+  // _readStream(Stream<List<int>> list) async {
+  //   try {
+  //     print("Data Arrived");
+  //     monitorSubscription = list.listen((event) {
+  //       print('Event, ${event.length}');
+  //       // if (event == 0) {
+  //       // handle!.read().then((value) {
+  //       //   print("Total Length is ${value.length}");
+  //       // });
+  //       // }
+  //     });
+  //   } catch (exception) {
+  //     print('Read Stream Exception');
+  //     print(exception.toString());
+  //   }
+  // }
 
   void start() {
     tempShot.update((val) {
@@ -197,7 +214,7 @@ class HomeController extends GetxController {
     });
     // tempShot.value.shot = tempShot.value.shot! + 1;
     isStarted.toggle();
-    // print("value---${isStarted.value}");
+
     location.onLocationChanged.listen((data) {
       var lat1 = basePoint.latitude!;
       var lon1 = basePoint.longitude!;
@@ -211,41 +228,70 @@ class HomeController extends GetxController {
       distMoved.value = 2 * r * asin(sqrt(a));
       // distMoved.value = d;
     });
-    DaqDeviceController daq = Get.put(DaqDeviceController());
+    // DaqDeviceController daq = Get.put(DaqDeviceController());
     if (isStarted.value == true) {
       // tempShot.value.shotData?.clear();
-      print("Handle ${daq.handle?.uuid}");
-      daq.handle!.write(Uint8List.fromList('Start'.codeUnits), false);
-      _readStream(daq.handle!.monitor());
+      print("Handle ${handle?.uuid} writing");
+      var index = 0;
+      handle!.value.listen((val) {
+        print("Notified Length is ${val.length}");
+
+        for (var i = 0; i < val.length; i += 2) {
+          isStarted.value = false;
+          int value = val[i] * 256 + val[i + 1] - 32768;
+          print("Inputed Value is ${value}");
+          tempShot.value.shotData?.add(value);
+          index++;
+          spotData.add(FlSpot(index.toDouble(), value.toDouble()));
+        }
+
+        // print(String.fromCharCodes(val));
+        // if ((tempShot.value.shotData?.length)! >= 0) {
+
+        // }
+      });
+      handle!.write(Uint8List.fromList('Start'.codeUnits)).then((value) {
+        // print("Write Result - --${value}");
+        // _readStream(handle!.value);
+        handle!.setNotifyValue(true);
+      });
+
+      // Future.delayed(const Duration(seconds: 1), () {
+
+      // });
+
+      // handle!.read().then((Uint8List value){
+      //   print("Length is ${value.length}");
+      //   print(String.fromCharCode(value));
+      // })
       tempShot.update((val) {
         val?.shotData?.clear();
       });
       // dataSource.clear();
-      timer = Timer.periodic(const Duration(milliseconds: 1), (timer) {
-        count.value = count.value + 1;
-        // dataSource.add(Point(count.value, Random().nextDouble() * 100));
-        // if (count.value % 10 == 0) {
-
-        int value = Random().nextInt(32444);
-        spotData.add(FlSpot(count.value.toDouble(), value.toDouble()));
-        tempShot.update((shot) {
-          shot?.shotData?.add(value);
-        });
-        // tempShot.value.shotData?.add(value);
-        // dataSource.add(FlSpot(count.toDouble(), Random().nextDouble() * 100));
-        // }
-        if (count.value >= 16384) {
-          print("Count is ${tempShot.value.shotData?.length}");
-          isStarted.value = false;
-          count.value = 0;
-          timer.cancel();
-        }
-      });
+      // timer = Timer.periodic(const Duration(milliseconds: 1), (timer) {
+      //   count.value = count.value + 1;
+      //   // dataSource.add(Point(count.value, Random().nextDouble() * 100));
+      //   // if (count.value % 10 == 0) {
+      //
+      //   int value = Random().nextInt(32444);
+      //   spotData.add(FlSpot(count.value.toDouble(), value.toDouble()));
+      //   tempShot.update((shot) {
+      //     shot?.shotData?.add(value);
+      //   });
+      //   // tempShot.value.shotData?.add(value);
+      //   // dataSource.add(FlSpot(count.toDouble(), Random().nextDouble() * 100));
+      //   // }
+      //   if (count.value >= 16384) {
+      //     print("Count is ${tempShot.value.shotData?.length}");
+      //     isStarted.value = false;
+      //     count.value = 0;
+      //     timer.cancel();
+      //   }
+      // });
     } else {
-      daq.handle!.write(Uint8List.fromList('Stop'.codeUnits), false);
-      monitorSubscription?.cancel();
+      handle!.write(Uint8List.fromList('Stop'.codeUnits));
+      handle!.setNotifyValue(false);
       count.value = 0;
-      timer?.cancel();
     }
     // tempShot.value.shot = 1;
   }
@@ -298,9 +344,9 @@ class HomeController extends GetxController {
   //   }
   // }
 
-  void startBluetooth() async {
-    Get.toNamed('/daq-device');
-  }
+  // void startBluetooth() async {
+  //   handle = Get.toNamed('/daq-device') as Characteristic;
+  // }
 
   List<List<dynamic>> metadata() {
     return [];
@@ -327,6 +373,30 @@ class HomeController extends GetxController {
     file.writeAsBytesSync(bytes);
 
     return file;
+  }
+
+  void startScan() async {
+    flutterBlue.startScan(timeout: const Duration(seconds: 5));
+    List<BluetoothDevice> ds = await flutterBlue.connectedDevices;
+    for (var element in ds) {
+      element.disconnect();
+    }
+    devices.clear();
+    var subscription = flutterBlue.scanResults.listen((results) {
+      for (ScanResult r in results) {
+//     if (discoveredScanResults
+//         .map((dsr) => dsr.identifier)
+//         .contains(scanResult.peripheral.identifier)) {
+        // ;
+        print(r.device.name);
+        if (devices
+            .map((e) => e.id.toString())
+            .contains(r.device.id.toString())) continue;
+        if (r.device.name.contains('DAQ') == false) continue;
+        devices.add(r.device);
+        print(r.device.name);
+      }
+    });
   }
 
   Future<File> writeCSVFile() async {
@@ -383,11 +453,22 @@ class HomeController extends GetxController {
     return file;
   }
 
+  void getHandle(id) async {
+    BluetoothDevice device =
+        devices.firstWhere((element) => element.id.toString() == id);
+    await device.connect(
+        timeout: const Duration(seconds: 10), autoConnect: false);
+    List<BluetoothService> services = await device.discoverServices();
+    BluetoothService ss = services
+        .firstWhere((element) => element.uuid.toString() == SERVICE_UUID);
+    var characteristics = ss.characteristics;
+    BluetoothCharacteristic c = characteristics.firstWhere(
+        (element) => element.uuid.toString() == CHARACTERISTIC_UUID);
+    handle = c;
+  }
+
   void onAction(value) async {
-    if (value == 1) {
-      print("Bluetooth");
-      startBluetooth();
-    } else if (value == 2) {
+    if (value == 2) {
       print("Email");
       // Directory project = await getTemporaryDirectory();
       tempShot.update((value) {
@@ -424,6 +505,78 @@ class HomeController extends GetxController {
 //         print('Result is ${result.toString()}');
 //         print("Email Sent");
 //       });
+    } else if (value == 3) {
+      var dlgContent = SingleChildScrollView(
+          child: SizedBox(
+              width: Get.width * 0.8,
+              height: Get.height * 0.4,
+              child: Column(
+                children: [
+                  Expanded(
+                      flex: 1,
+                      child: Column(
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            CustomTextFormField(
+                              onChange: (v) {
+                                project.value.name = v;
+                              },
+                              prefixIcon: Icons.padding,
+                              hintText: "Project",
+                            ),
+                            const SizedBox(height: 5),
+                            CustomTextFormField(
+                              prefixIcon: Icons.person,
+                              hintText: "User",
+                              onChange: (v) {
+                                project.value.user = v;
+                              },
+                            ),
+                            const SizedBox(height: 5),
+                            Obx(() => DropdownButtonFormField<String>(
+                                  decoration: InputDecoration(
+                                      prefixIcon: IconButton(
+                                          icon: const Icon(Icons.refresh),
+                                          onPressed: () async {
+                                            startScan();
+                                          })),
+                                  hint: const Text('Device'),
+                                  items: devices.map((e) {
+                                    return DropdownMenuItem<String>(
+                                      value: e.id.toString(),
+                                      child: Text(e.name),
+                                    );
+                                  }).toList(),
+                                  onChanged: (v) {
+                                    getHandle(v);
+                                    // service?.service?.handle(v!).then((value) {
+                                    //   p.handle = value;
+                                    // });
+                                  },
+                                )),
+                          ])),
+                  IntrinsicHeight(
+                      child:
+                          //  Container(color: Colors.black),
+                          CustomTextFormField(
+                    hintText: "Notes",
+                    onChange: (v) {},
+                    maxLine: 3,
+                  )),
+                ],
+              )));
+
+      Get.defaultDialog(title: "Setting", content: dlgContent);
+      // Get.toNamed("/setting");
     }
+  }
+
+  void setSettings() {}
+
+  void deviceDiscovered(BluetoothDevice device) {
+    // print(device.name);
+    devices.add(device);
+    // devices.add(device.name);
   }
 }

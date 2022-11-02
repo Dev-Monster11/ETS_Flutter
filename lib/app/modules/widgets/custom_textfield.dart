@@ -18,10 +18,11 @@ class CustomTextFormField extends StatefulWidget {
       this.initialValue,
       this.validate,
       this.maxLength,
+      this.maxLine,
       this.inputFormatter,
       this.suffixCallback})
       : super(key: key);
-
+  final int? maxLine;
   final String? label;
   final TextEditingController? controller;
   final String? hintText;
@@ -45,32 +46,20 @@ class CustomTextFormField extends StatefulWidget {
 class _CustomTextFormFieldState extends State<CustomTextFormField> {
   bool isValid = true;
 
-  int _maxLength() {
-    if (widget.maxLength == null) {
-      return 100;
-    } else {
-      return widget.maxLength!;
-    }
-  }
-  // List<dynamic> _inputFormatter(){
-  //   if (widget.inputFormatter == null){
-  //     return [];
-  //   }else{
-  //     return widget.inputFormatter;
-  //   }
-
-  // }
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return
+
+
+        Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.label != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Text(
               widget.label!,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 10),
             ),
           ),
         Container(
@@ -80,30 +69,19 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             controller: widget.controller,
             enabled: widget.isEnabled,
             obscureText: widget.enableObscure,
+            maxLines: widget.maxLine ?? 1,
             validator: widget.validate,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            maxLength: _maxLength(),
+            maxLength: widget.maxLength ?? 100,
             inputFormatters: widget.inputFormatter,
             onChanged: (val) {
-              // if (widget.emailField == true) {
-              //   isValid = validateEmail(val);
-              // }
-              // if (widget.lengthField == true) {
-              //   isValid = validateMinLength(val, 3);
-              // }
-              // if (widget.requiredField == true) {
-              //   isValid = validateEmpty(val);
-              // }
-
-              // setState(() {});
-              // widget.validate!(isValid);
-              // if (widget.onChange)
               if (widget.onChange != null) widget.onChange!(val);
             },
             initialValue: widget.initialValue,
             decoration: InputDecoration(
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+              // contentPadding:
+              //     const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              counterText: "",
               hintText: widget.hintText,
               labelStyle: widget.labelStyle,
               prefixIcon: widget.prefixIcon == null
