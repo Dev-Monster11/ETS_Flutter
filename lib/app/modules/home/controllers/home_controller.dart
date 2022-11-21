@@ -503,8 +503,8 @@ class HomeController extends GetxController {
 //         print("Email Sent");
 //       });
     } else if (value == 3) {
-      // Get.toNamed('/setting');
-      // return;
+      Get.toNamed('/setting');
+      return;
       var dlgContent = SingleChildScrollView(
           child: SizedBox(
               width: Get.width * 0.8,
