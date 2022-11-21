@@ -16,7 +16,6 @@ class SettingController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    print("------------------------------------");
   }
 
   @override
