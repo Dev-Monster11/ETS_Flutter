@@ -14,14 +14,14 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    const topStyle = TextStyle(color: ets_white, fontWeight: FontWeight.bold);
-    const saveStyle = TextStyle(color: Color(0xFF212121));
-    final gains = [1, 2, 5, 10];
-    final freqs = [900, 1800, 3600, 7200, 14400];
+    // const topStyle = TextStyle(color: ets_white, fontWeight: FontWeight.bold);
+    // const saveStyle = TextStyle(color: Color(0xFF212121));
+    // final gains = [1, 2, 5, 10];
+    // final freqs = [900, 1800, 3600, 7200, 14400];
 
     return Scaffold(
         key: controller.scaffoldKey,
-        extendBodyBehindAppBar: true,
+        // extendBodyBehindAppBar: true,
         appBar: AppBar(
           actions: [
             PopupMenuButton<int>(
@@ -60,9 +60,13 @@ class HomeView extends GetView<HomeController> {
         ),
         body: SafeArea(
             child: Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 width: Get.width,
                 height: Get.height,
+                decoration: const BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/setting_bg.jpg'),
+                        fit: BoxFit.cover)),
                 child: Column(
                   children: [
                     Expanded(
@@ -359,9 +363,9 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildChart() {
     return LineChart(LineChartData(
-      minY: 0.0,
+      minY: -32768,
       minX: 0.0,
-      maxY: 65536,
+      maxY: 32767,
       maxX: 16384,
       titlesData: FlTitlesData(show: false),
       lineTouchData: LineTouchData(enabled: false),

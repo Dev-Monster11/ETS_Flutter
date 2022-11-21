@@ -231,11 +231,8 @@ class HomeController extends GetxController {
     // DaqDeviceController daq = Get.put(DaqDeviceController());
     if (isStarted.value == true) {
       // tempShot.value.shotData?.clear();
-      print("Handle ${handle?.uuid} writing");
       var index = 0;
       handle!.value.listen((val) {
-        print("Notified Length is ${val.length}");
-
         for (var i = 0; i < val.length; i += 2) {
           isStarted.value = false;
           int value = val[i] * 256 + val[i + 1] - 32768;
@@ -471,10 +468,10 @@ class HomeController extends GetxController {
     if (value == 2) {
       print("Email");
       // Directory project = await getTemporaryDirectory();
-      tempShot.update((value) {
-        value?.shotData?.clear();
-      });
-      return;
+      // tempShot.update((value) {
+      //   value?.shotData?.clear();
+      // });
+      // return;
       writeCSVFile().then((value) async {
         Get.snackbar("Save", "Meta data saved to ${value.path}");
         var encoder = ZipFileEncoder();
@@ -506,6 +503,8 @@ class HomeController extends GetxController {
 //         print("Email Sent");
 //       });
     } else if (value == 3) {
+      Get.toNamed('/setting');
+      return;
       var dlgContent = SingleChildScrollView(
           child: SizedBox(
               width: Get.width * 0.8,

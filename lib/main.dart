@@ -17,7 +17,7 @@ void main() {
   runApp(
     GetMaterialApp(
       title: "ETS",
-      debugShowCheckedModeBanner: false,
+      // debugShowCheckedModeBanner: false,
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       theme: _lightTheme,
