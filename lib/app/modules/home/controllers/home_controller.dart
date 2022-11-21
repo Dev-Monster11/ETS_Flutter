@@ -224,7 +224,7 @@ class HomeController extends GetxController {
     if (isStarted.value == true) {
       // tempShot.value.shotData?.clear();
       var index = 0;
-      handle!.value.listen((val) {
+      handle?.value.listen((val) {
         for (var i = 0; i < val.length; i += 2) {
           isStarted.value = false;
           int value = val[i] * 256 + val[i + 1] - 32768;
@@ -239,7 +239,7 @@ class HomeController extends GetxController {
 
         // }
       });
-      handle!.write(Uint8List.fromList('Start'.codeUnits)).then((value) {
+      handle?.write(Uint8List.fromList('Start'.codeUnits)).then((value) {
         // print("Write Result - --${value}");
         // _readStream(handle!.value);
         handle!.setNotifyValue(true);
@@ -565,5 +565,12 @@ class HomeController extends GetxController {
 
   void deviceDiscovered(BluetoothDevice device) {
     devices.add(device);
+  }
+
+  void saveDAQ() {
+    handle?.write(Uint8List.fromList('Range${tempShot.value.gain}'.codeUnits));
+    handle?.write(Uint8List.fromList('Rate${tempShot.value.sr}'.codeUnits));
+    handle?.write(Uint8List.fromList('Trigger12345'.codeUnits));
+    Get.back();
   }
 }

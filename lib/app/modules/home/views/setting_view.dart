@@ -70,7 +70,7 @@ class SettingView extends GetView<HomeController> {
                     elevation: 16,
                     onChanged: (value) {
                       controller.tempShot.update((shot) {
-                        shot?.gain = int.parse(value.toString());
+                        shot?.sr = int.parse(value.toString());
                       });
                     },
                     isExpanded: true,
@@ -118,6 +118,8 @@ class SettingView extends GetView<HomeController> {
               initialValue: controller.tempShot.value.notes,
               hintText: "Notes",
             ),
+            IconButton(
+                onPressed: controller.saveDAQ, icon: const Icon(Icons.save)),
           ],
         ),
       ),
