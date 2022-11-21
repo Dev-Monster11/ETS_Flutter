@@ -30,7 +30,7 @@ class AppPages {
     GetPage(
       name: _Paths.SETTING,
       page: () => SettingView(),
-      binding: SettingBinding(),
+      binding: HomeBinding(),
       transition: Transition.leftToRight,
     ),
   ];
