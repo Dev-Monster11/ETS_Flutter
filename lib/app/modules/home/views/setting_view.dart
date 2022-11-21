@@ -2,13 +2,12 @@ import 'package:ets/app/modules/home/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import '../controllers/setting_controller.dart';
+import '../controllers/home_controller.dart';
 import '../../widgets/custom_textfield.dart';
 
-class SettingView extends GetView<SettingController> {
+class SettingView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
-    final HomeController c = Get.find();
     final gains = [1, 2, 5, 10];
     final freqs = [900, 1800, 3600, 7200, 14400];
     return Scaffold(
@@ -22,10 +21,10 @@ class SettingView extends GetView<SettingController> {
           children: [
             CustomTextFormField(
               onChange: (v) {
-                c.project.value.name = v;
+                controller.project.value.name = v;
               },
               prefixIcon: Icons.padding,
-              initialValue: c.project.value.name,
+              initialValue: controller.project.value.name,
               hintText: "Project",
             ),
             const SizedBox(
@@ -33,10 +32,10 @@ class SettingView extends GetView<SettingController> {
             ),
             Obx(() => CustomTextFormField(
                   onChange: (v) {
-                    c.project.value.user = v;
+                    controller.project.value.user = v;
                   },
                   prefixIcon: Icons.person,
-                  initialValue: c.project.value.user,
+                  initialValue: controller.project.value.user,
                   hintText: "User",
                 )),
             const SizedBox(
@@ -48,11 +47,11 @@ class SettingView extends GetView<SettingController> {
               children: [
                 Expanded(
                   child: DropdownButton(
-                    value: c.tempShot.value.gain,
+                    value: controller.tempShot.value.gain,
                     icon: const Icon(Icons.arrow_downward),
                     elevation: 16,
                     onChanged: (value) {
-                      c.tempShot.update((shot) {
+                      controller.tempShot.update((shot) {
                         shot?.gain = int.parse(value.toString());
                       });
                     },
@@ -66,11 +65,11 @@ class SettingView extends GetView<SettingController> {
                 const SizedBox(width: 30),
                 Expanded(
                   child: DropdownButton(
-                    value: c.tempShot.value.sr,
+                    value: controller.tempShot.value.sr,
                     icon: const Icon(Icons.arrow_downward),
                     elevation: 16,
                     onChanged: (value) {
-                      c.tempShot.update((shot) {
+                      controller.tempShot.update((shot) {
                         shot?.gain = int.parse(value.toString());
                       });
                     },
@@ -91,17 +90,17 @@ class SettingView extends GetView<SettingController> {
                       prefixIcon: IconButton(
                           icon: const Icon(Icons.refresh),
                           onPressed: () async {
-                            c.startScan();
+                            controller.startScan();
                           })),
                   hint: const Text('Device'),
-                  items: c.devices.map((e) {
+                  items: controller.devices.map((e) {
                     return DropdownMenuItem<String>(
                       value: e.id.toString(),
                       child: Text(e.name),
                     );
                   }).toList(),
                   onChanged: (v) {
-                    c.getHandle(v);
+                    controller.getHandle(v);
                     // service?.service?.handle(v!).then((value) {
                     //   p.handle = value;
                     // });
@@ -112,11 +111,11 @@ class SettingView extends GetView<SettingController> {
             ),
             CustomTextFormField(
               onChange: (v) {
-                c.tempShot.value.notes = v;
+                controller.tempShot.value.notes = v;
               },
               maxLine: 5,
               prefixIcon: Icons.notes,
-              initialValue: c.tempShot.value.notes,
+              initialValue: controller.tempShot.value.notes,
               hintText: "Notes",
             ),
           ],

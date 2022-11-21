@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:ets/app/modules/daq_device/controllers/daq_device_controller.dart';
-import 'package:ets/app/services/bluetooth_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
@@ -11,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:location/location.dart';
 import 'package:share_plus/share_plus.dart';
-// import 'package:flutter_ble_lib_ios_15/flutter_ble_lib.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:csv/csv.dart';
 import 'package:archive/archive_io.dart';
@@ -21,7 +17,6 @@ import 'dart:io';
 import 'dart:math';
 import '../../widgets/custom_textfield.dart';
 import '../project_model.dart';
-import '../shot_model.dart';
 
 const String SERVICE_UUID = "0000fe84-0000-1000-8000-00805f9b34fb";
 const String CHARACTERISTIC_UUID = "2d30c082-f39f-4ce6-923f-3484ea480596";
@@ -32,7 +27,6 @@ class HomeController extends GetxController {
   final project = Project(name: '', shots: []).obs;
 
   final shots = <Shot>[].obs;
-  final freq = 900.obs;
   final totalShots = 0.obs;
   final isBusy = false.obs;
   late LocationData basePoint;
@@ -77,7 +71,7 @@ class HomeController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
-    Future.delayed(Duration(seconds: 3)).then((value) {
+    Future.delayed(const Duration(seconds: 3)).then((value) {
       FlutterNativeSplash.remove();
     });
     bool _serviceEnabled = await location.serviceEnabled();
@@ -162,8 +156,6 @@ class HomeController extends GetxController {
   }
 
   void changeBottomCards(int index, var value) async {
-    print('--value$value');
-
     if (index == 1) {
       tempShot.update((val) {
         val?.line = value.toInt();
@@ -381,17 +373,11 @@ class HomeController extends GetxController {
     devices.clear();
     var subscription = flutterBlue.scanResults.listen((results) {
       for (ScanResult r in results) {
-//     if (discoveredScanResults
-//         .map((dsr) => dsr.identifier)
-//         .contains(scanResult.peripheral.identifier)) {
-        // ;
-        print(r.device.name);
         if (devices
             .map((e) => e.id.toString())
             .contains(r.device.id.toString())) continue;
         if (r.device.name.contains('DAQ') == false) continue;
         devices.add(r.device);
-        print(r.device.name);
       }
     });
   }
@@ -462,6 +448,10 @@ class HomeController extends GetxController {
     BluetoothCharacteristic c = characteristics.firstWhere(
         (element) => element.uuid.toString() == CHARACTERISTIC_UUID);
     handle = c;
+    print("------");
+    print("Get Handle----${handle?.deviceId.toString()}");
+
+    print("------");
   }
 
   void onAction(value) async {
@@ -505,77 +495,75 @@ class HomeController extends GetxController {
     } else if (value == 3) {
       Get.toNamed('/setting');
       return;
-      var dlgContent = SingleChildScrollView(
-          child: SizedBox(
-              width: Get.width * 0.8,
-              height: Get.height * 0.4,
-              child: Column(
-                children: [
-                  Expanded(
-                      flex: 1,
-                      child: Column(
-                          // crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            CustomTextFormField(
-                              onChange: (v) {
-                                project.value.name = v;
-                              },
-                              prefixIcon: Icons.padding,
-                              hintText: "Project",
-                            ),
-                            const SizedBox(height: 5),
-                            CustomTextFormField(
-                              prefixIcon: Icons.person,
-                              hintText: "User",
-                              onChange: (v) {
-                                project.value.user = v;
-                              },
-                            ),
-                            const SizedBox(height: 5),
-                            Obx(() => DropdownButtonFormField<String>(
-                                  decoration: InputDecoration(
-                                      prefixIcon: IconButton(
-                                          icon: const Icon(Icons.refresh),
-                                          onPressed: () async {
-                                            startScan();
-                                          })),
-                                  hint: const Text('Device'),
-                                  items: devices.map((e) {
-                                    return DropdownMenuItem<String>(
-                                      value: e.id.toString(),
-                                      child: Text(e.name),
-                                    );
-                                  }).toList(),
-                                  onChanged: (v) {
-                                    getHandle(v);
-                                    // service?.service?.handle(v!).then((value) {
-                                    //   p.handle = value;
-                                    // });
-                                  },
-                                )),
-                          ])),
-                  IntrinsicHeight(
-                      child:
-                          //  Container(color: Colors.black),
-                          CustomTextFormField(
-                    hintText: "Notes",
-                    onChange: (v) {},
-                    maxLine: 3,
-                  )),
-                ],
-              )));
+      // var dlgContent = SingleChildScrollView(
+      //     child: SizedBox(
+      //         width: Get.width * 0.8,
+      //         height: Get.height * 0.4,
+      //         child: Column(
+      //           children: [
+      //             Expanded(
+      //                 flex: 1,
+      //                 child: Column(
+      //                     // crossAxisAlignment: CrossAxisAlignment.start,
+      //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //                     children: [
+      //                       CustomTextFormField(
+      //                         onChange: (v) {
+      //                           project.value.name = v;
+      //                         },
+      //                         prefixIcon: Icons.padding,
+      //                         hintText: "Project",
+      //                       ),
+      //                       const SizedBox(height: 5),
+      //                       CustomTextFormField(
+      //                         prefixIcon: Icons.person,
+      //                         hintText: "User",
+      //                         onChange: (v) {
+      //                           project.value.user = v;
+      //                         },
+      //                       ),
+      //                       const SizedBox(height: 5),
+      //                       Obx(() => DropdownButtonFormField<String>(
+      //                             decoration: InputDecoration(
+      //                                 prefixIcon: IconButton(
+      //                                     icon: const Icon(Icons.refresh),
+      //                                     onPressed: () async {
+      //                                       startScan();
+      //                                     })),
+      //                             hint: const Text('Device'),
+      //                             items: devices.map((e) {
+      //                               return DropdownMenuItem<String>(
+      //                                 value: e.id.toString(),
+      //                                 child: Text(e.name),
+      //                               );
+      //                             }).toList(),
+      //                             onChanged: (v) {
+      //                               getHandle(v);
+      //                               // service?.service?.handle(v!).then((value) {
+      //                               //   p.handle = value;
+      //                               // });
+      //                             },
+      //                           )),
+      //                     ])),
+      //             IntrinsicHeight(
+      //                 child:
+      //                     //  Container(color: Colors.black),
+      //                     CustomTextFormField(
+      //               hintText: "Notes",
+      //               onChange: (v) {},
+      //               maxLine: 3,
+      //             )),
+      //           ],
+      //         )));
 
-      Get.defaultDialog(title: "Setting", content: dlgContent);
-      // Get.toNamed("/setting");
+      // Get.defaultDialog(title: "Setting", content: dlgContent);
+
     }
   }
 
   void setSettings() {}
 
   void deviceDiscovered(BluetoothDevice device) {
-    // print(device.name);
     devices.add(device);
-    // devices.add(device.name);
   }
 }

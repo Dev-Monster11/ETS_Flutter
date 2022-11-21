@@ -1,13 +1,10 @@
 import 'package:get/get.dart';
 
-import 'package:ets/app/modules/daq_device/bindings/daq_device_binding.dart';
-import 'package:ets/app/modules/daq_device/views/daq_device_view.dart';
 import 'package:ets/app/modules/home/bindings/home_binding.dart';
 import 'package:ets/app/modules/home/views/home_view.dart';
 import 'package:ets/app/modules/project/bindings/project_binding.dart';
 import 'package:ets/app/modules/project/views/project_view.dart';
-import 'package:ets/app/modules/setting/bindings/setting_binding.dart';
-import 'package:ets/app/modules/setting/views/setting_view.dart';
+import 'package:ets/app/modules/home/views/setting_view.dart';
 
 part 'app_routes.dart';
 
