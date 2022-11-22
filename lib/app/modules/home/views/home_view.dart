@@ -284,18 +284,18 @@ class HomeView extends GetView<HomeController> {
   Widget topInfo() {
     return Column(children: [
       Row(children: [
-        Text("Project"),
-        SizedBox(width: 20),
+        const Text("Project"),
+        const SizedBox(width: 20),
         Obx(() => Text(controller.project.value.name ?? ''))
       ]),
-      SizedBox(height: 10),
+      const SizedBox(height: 10),
       Row(children: [
-        Text("User"),
-        SizedBox(width: 10),
+        const Text("User"),
+        const SizedBox(width: 10),
         Obx(() => Text(controller.project.value.user ?? '')),
-        SizedBox(width: 20),
-        Text("Sensor"),
-        SizedBox(width: 10),
+        const SizedBox(width: 20),
+        const Text("Sensor"),
+        const SizedBox(width: 10),
         Obx(() => Text(controller.project.value.sensor ?? ''))
       ])
       // infoCard("Project", Icon(Icons.task, size: 20), Obx(() => Text(controller.project.value.name ?? ''))),
@@ -303,63 +303,6 @@ class HomeView extends GetView<HomeController> {
       // infoCard("Sensor", Icon(Icons.task, size: 20), Obx(() => Text(controller.project.value.sensor ?? ''))),
     ]);
   }
-  // Widget topCards(var index, var gradientColor1, var gradientColor2,
-  //     Widget icon, Widget child) {
-  //   return GestureDetector(
-  //     onTap: () {
-  //       showModalBottomSheet(
-  //           isScrollControlled: true,
-  //           context: Get.context!,
-  //           shape: const RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.only(
-  //                 topLeft: Radius.circular(30.0),
-  //                 topRight: Radius.circular(30.0)),
-  //           ),
-  //           builder: (BuildContext ctx) {
-  //             return Padding(
-  //                 padding: MediaQuery.of(Get.context!).viewInsets,
-  //                 child: Column(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     mainAxisSize: MainAxisSize.min,
-  //                     children: [
-  //                       Container(
-  //                           padding: const EdgeInsets.all(10),
-  //                           child: CustomTextFormField(
-  //                             // label: ,
-  //                             initialValue: controller.initialValue(index),
-  //                             onChange: (value) {
-  //                               // controller.tempContent[index] = value;
-  //                               controller.changeTopCards(index, value);
-  //                             },
-  //                           )),
-  //                       // IconButton(
-  //                       //     icon: const Icon(Icons.save),
-  //                       //     onPressed: () {
-  //                       //       Navigator.pop(ctx);
-  //                       //       // controller.saveContent(index);
-  //                       //     })
-  //                     ]));
-  //           });
-  //     },
-  //     child: Container(
-  //       decoration: gradientBoxDecoration(
-  //           showShadow: true,
-  //           gradientColor1: gradientColor1,
-  //           gradientColor2: gradientColor2),
-  //       padding: const EdgeInsets.all(5),
-  //       child: Row(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           icon,
-  //           const SizedBox(
-  //             width: 8,
-  //           ),
-  //           child,
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildChart() {
     return LineChart(LineChartData(

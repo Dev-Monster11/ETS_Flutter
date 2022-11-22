@@ -24,7 +24,7 @@ const MAX_COUNT = 16384;
 
 class HomeController extends GetxController {
   var scaffoldKey = GlobalKey<ScaffoldState>();
-  final project = Project(name: '', shots: []).obs;
+  final project = Project(name: 'Untitled1', shots: []).obs;
 
   final shots = <Shot>[].obs;
   final totalShots = 0.obs;
@@ -200,10 +200,7 @@ class HomeController extends GetxController {
   //   }
   // }
 
-  void start() {
-    tempShot.update((val) {
-      val?.shot = val.shot! + 1;
-    });
+  void start() async {
     // tempShot.value.shot = tempShot.value.shot! + 1;
     isStarted.toggle();
 
@@ -224,11 +221,11 @@ class HomeController extends GetxController {
     if (isStarted.value == true) {
       // tempShot.value.shotData?.clear();
       var index = 0;
+      await handle?.write(Uint8List.fromList('Start'.codeUnits));
       handle?.value.listen((val) {
         for (var i = 0; i < val.length; i += 2) {
           isStarted.value = false;
           int value = val[i] * 256 + val[i + 1] - 32768;
-          print("Inputed Value is ${value}");
           tempShot.value.shotData?.add(value);
           index++;
           spotData.add(FlSpot(index.toDouble(), value.toDouble()));
@@ -239,12 +236,12 @@ class HomeController extends GetxController {
 
         // }
       });
-      handle?.write(Uint8List.fromList('Start'.codeUnits)).then((value) {
-        // print("Write Result - --${value}");
-        // _readStream(handle!.value);
-        handle!.setNotifyValue(true);
-      });
 
+      // handle?.write(Uint8List.fromList('Start'.codeUnits)).then((value) {
+      //   // print("Write Result - --${value}");
+      //   // _readStream(handle!.value);
+      //   handle?.setNotifyValue(true);
+      // });
       // Future.delayed(const Duration(seconds: 1), () {
 
       // });
@@ -283,6 +280,9 @@ class HomeController extends GetxController {
       count.value = 0;
     }
     // tempShot.value.shot = 1;
+    tempShot.update((val) {
+      val?.shot = val.shot! + 1;
+    });
   }
 
   void saveShot() {
@@ -448,15 +448,18 @@ class HomeController extends GetxController {
     BluetoothCharacteristic c = characteristics.firstWhere(
         (element) => element.uuid.toString() == CHARACTERISTIC_UUID);
     handle = c;
-    print("------");
-    print("Get Handle----${handle?.deviceId.toString()}");
 
     print("------");
+    print("Get Handle----${handle?.uuid.toString()}");
+    print("------");
+    // handle?.write(Uint8List.fromList('Rate3600'.codeUnits));
   }
 
   void onAction(value) async {
     if (value == 2) {
       print("Email");
+      print("Project Namee is ${project.value.name}");
+
       // Directory project = await getTemporaryDirectory();
       // tempShot.update((value) {
       //   value?.shotData?.clear();
@@ -568,9 +571,15 @@ class HomeController extends GetxController {
   }
 
   void saveDAQ() {
-    handle?.write(Uint8List.fromList('Range${tempShot.value.gain}'.codeUnits));
-    handle?.write(Uint8List.fromList('Rate${tempShot.value.sr}'.codeUnits));
-    handle?.write(Uint8List.fromList('Trigger12345'.codeUnits));
+    // handle?.write(Uint8List.fromList('Range${tempShot.value.gain}'.codeUnits));
+
+    handle
+        ?.write(Uint8List.fromList('Rate${tempShot.value.sr}'.codeUnits))
+        .then((_) {
+      print(_);
+      print("Rate is changed");
+    });
+    // handle?.write(Uint8List.fromList('Trigger12345'.codeUnits));
     Get.back();
   }
 }

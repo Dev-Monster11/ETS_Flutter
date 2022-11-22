@@ -21,7 +21,10 @@ class SettingView extends GetView<HomeController> {
           children: [
             CustomTextFormField(
               onChange: (v) {
-                controller.project.value.name = v;
+                controller.project.update((val) {
+                  val?.name = v;
+                });
+                // controller.project.value.name = v;
               },
               prefixIcon: Icons.padding,
               initialValue: controller.project.value.name,
@@ -46,39 +49,39 @@ class SettingView extends GetView<HomeController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: DropdownButton(
-                    value: controller.tempShot.value.gain,
-                    icon: const Icon(Icons.arrow_downward),
-                    elevation: 16,
-                    onChanged: (value) {
-                      controller.tempShot.update((shot) {
-                        shot?.gain = int.parse(value.toString());
-                      });
-                    },
-                    isExpanded: true,
-                    items: gains.map((item) {
-                      return DropdownMenuItem(
-                          child: Text('$item'), value: item);
-                    }).toList(),
-                  ),
+                  child: Obx(() => DropdownButton(
+                        value: controller.tempShot.value.gain,
+                        icon: const Icon(Icons.arrow_downward),
+                        elevation: 16,
+                        onChanged: (value) {
+                          controller.tempShot.update((shot) {
+                            shot?.gain = int.parse(value.toString());
+                          });
+                        },
+                        isExpanded: true,
+                        items: gains.map((item) {
+                          return DropdownMenuItem(
+                              child: Text('$item'), value: item);
+                        }).toList(),
+                      )),
                 ),
                 const SizedBox(width: 30),
                 Expanded(
-                  child: DropdownButton(
-                    value: controller.tempShot.value.sr,
-                    icon: const Icon(Icons.arrow_downward),
-                    elevation: 16,
-                    onChanged: (value) {
-                      controller.tempShot.update((shot) {
-                        shot?.sr = int.parse(value.toString());
-                      });
-                    },
-                    isExpanded: true,
-                    items: freqs.map((item) {
-                      return DropdownMenuItem(
-                          child: Text('${item}Hz'), value: item);
-                    }).toList(),
-                  ),
+                  child: Obx(() => DropdownButton(
+                        value: controller.tempShot.value.sr,
+                        icon: const Icon(Icons.arrow_downward),
+                        elevation: 16,
+                        onChanged: (value) {
+                          controller.tempShot.update((shot) {
+                            shot?.sr = int.parse(value.toString());
+                          });
+                        },
+                        isExpanded: true,
+                        items: freqs.map((item) {
+                          return DropdownMenuItem(
+                              child: Text('${item}Hz'), value: item);
+                        }).toList(),
+                      )),
                 )
               ],
             ),
